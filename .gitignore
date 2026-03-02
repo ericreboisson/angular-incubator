@@ -1,0 +1,32 @@
+# Dependencies
+node_modules/
+package-lock.json
+npm-debug.log
+yarn-error.log
+
+# Build output
+dist/
+out-tsc/
+bazel-out/
+
+# Angular specific
+.angular/
+.nx/
+
+# Log files
+*.log
+
+# Editor directories and files
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Environment files
+.env
+
+# MacOS specific
+.DS_Store

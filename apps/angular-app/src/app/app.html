@@ -1,0 +1,20 @@
+<main class="main">
+  <div class="content">
+    <h1>Welcome to {{ title() }}</h1>
+    <p>This application demonstrates merging local Angular environment config with an external JSON file using the
+      <code>config-merge</code> library.</p>
+
+    <div class="card">
+      <h2>Merged Configuration:</h2>
+      <pre><code>{{ config | json }}</code></pre>
+    </div>
+
+    @if (betaFeatureEnabled) {
+    <div class="card" style="margin-top: 1rem; border-left: 4px solid #4CAF50;">
+      <h2>Beta Feature is Enabled! ✨</h2>
+      <p>This section is only visible because <code>betaFeature</code> is set to true in the configuration.</p>
+      <p>A log has also been sent to <code>{{ config.apiEndpoint }}/logs</code>.</p>
+    </div>
+    }
+  </div>
+</main>

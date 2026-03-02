@@ -1,0 +1,7 @@
+{
+    "apiEndpoint": "http://localhost:3000",
+    "featureFlags": {
+        "newUI": true,
+        "betaFeature": true
+    }
+}
