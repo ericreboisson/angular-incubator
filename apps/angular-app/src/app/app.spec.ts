@@ -14,7 +14,11 @@ describe('App', () => {
         {
           provide: ConfigService,
           useValue: {
-            getConfig: () => ({ apiEndpoint: 'http://test', featureFlags: { betaFeature: true } })
+            getConfig: () => ({ apiEndpoint: 'http://test', featureFlags: { betaFeature: true } }),
+            getProperty: (key: string) => {
+              if (key === 'featureFlags') return { betaFeature: true };
+              return undefined;
+            }
           }
         },
         {

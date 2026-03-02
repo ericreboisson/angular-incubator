@@ -32,6 +32,21 @@ export class ConfigService<T extends object> {
     }
 
     /**
+     * Retrieves a specific property from the configuration in a type-safe manner.
+     * Use this instead of `(config as any).property`.
+     * 
+     * @param key The property key to retrieve from the configuration object.
+     * @returns The value of the property, or undefined if it does not exist.
+     */
+    getProperty<K extends keyof T>(key: K): T[K] | undefined {
+        if (!this.config) {
+            console.warn(`ConfigService: Configuration not loaded. Cannot get property '${String(key)}'`);
+            return undefined;
+        }
+        return this.config[key];
+    }
+
+    /**
      * Returns the current merged configuration.
      * Throws an error if accessed before `loadAndMerge` has completed successfully.
      */

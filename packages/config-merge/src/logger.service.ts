@@ -1,24 +1,44 @@
 import { ConfigService } from './config.service';
 
-/**
- * A generic HTTP logger service that posts logs to a remote endpoint.
- * Requires a ConfigService to determine the API endpoint and whether logging is enabled.
- */
-export class HttpLoggerService<T extends { apiEndpoint: string; featureFlags?: { enableLogging?: boolean } }> {
+export class HttpLoggerService<T extends object> {
     constructor(private configService: ConfigService<T>) { }
 
     /**
-     * Sends a log record to the server if logging is enabled in the configuration.
-     * @param level The log level (e.g., 'info', 'warn', 'error').
-     * @param message The log message.
-     * @param context Additional context data object.
+     * Sends an info log to the server.
      */
-    async log(level: 'info' | 'warn' | 'error', message: string, context?: Record<string, any>): Promise<void> {
-        const config = this.configService.getConfig();
+    async info(message: string, context?: Record<string, any>): Promise<void> {
+        return this.log('info', message, context);
+    }
 
-        // Check if logging is enabled via feature flag (defaults to false if not explicitly set)
-        if (!config.featureFlags?.enableLogging) {
-            console.log(`[HttpLoggerService] Logging disabled. Skipping log: [${level}] ${message}`);
+    /**
+     * Sends a warning log to the server.
+     */
+    async warn(message: string, context?: Record<string, any>): Promise<void> {
+        return this.log('warn', message, context);
+    }
+
+    /**
+     * Sends an error log to the server.
+     */
+    async error(message: string, context?: Record<string, any>): Promise<void> {
+        return this.log('error', message, context);
+    }
+
+    /**
+     * Internal method to construct and send the log payload via HTTP POST.
+     */
+    private async log(level: 'info' | 'warn' | 'error', message: string, context?: Record<string, any>): Promise<void> {
+        // Using the new type-safe property accessor to prevent 'as any' hacks
+        const featureFlags = this.configService.getProperty('featureFlags' as keyof T) as any;
+        const apiEndpoint = this.configService.getProperty('apiEndpoint' as keyof T);
+
+        if (!featureFlags?.enableLogging) {
+            console.log(`[HttpLoggerService] Logging disabled for: [${level.toUpperCase()}] ${message}`);
+            return;
+        }
+
+        if (!apiEndpoint || typeof apiEndpoint !== 'string') {
+            console.warn('[HttpLoggerService] Cannot send log: apiEndpoint is not defined or is not a string in configuration.');
             return;
         }
 
@@ -30,7 +50,7 @@ export class HttpLoggerService<T extends { apiEndpoint: string; featureFlags?: {
         };
 
         try {
-            const response = await fetch(`${config.apiEndpoint}/logs`, {
+            const response = await fetch(`${apiEndpoint}/logs`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -39,22 +59,10 @@ export class HttpLoggerService<T extends { apiEndpoint: string; featureFlags?: {
             });
 
             if (!response.ok) {
-                console.warn(`[HttpLoggerService] Failed to send log to ${config.apiEndpoint}/logs. Status: ${response.status}`);
+                console.warn(`[HttpLoggerService] Failed to send log. Server responded with status: ${response.status}`);
             }
         } catch (error) {
-            console.error(`[HttpLoggerService] Error sending log HTTP request:`, error);
+            console.error('[HttpLoggerService] Error sending log HTTP request:', error);
         }
-    }
-
-    info(message: string, context?: Record<string, any>) {
-        return this.log('info', message, context);
-    }
-
-    warn(message: string, context?: Record<string, any>) {
-        return this.log('warn', message, context);
-    }
-
-    error(message: string, context?: Record<string, any>) {
-        return this.log('error', message, context);
     }
 }

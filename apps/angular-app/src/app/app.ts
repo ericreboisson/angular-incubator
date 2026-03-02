@@ -15,7 +15,8 @@ export class App implements OnInit {
   protected readonly loggerService = inject(HttpLoggerService<typeof environment>);
 
   protected config = this.configService.getConfig();
-  protected betaFeatureEnabled = this.config.featureFlags?.betaFeature ?? false;
+  protected featureFlags = this.configService.getProperty('featureFlags');
+  protected betaFeatureEnabled = this.featureFlags?.betaFeature ?? false;
 
   ngOnInit() {
     if (this.betaFeatureEnabled) {
