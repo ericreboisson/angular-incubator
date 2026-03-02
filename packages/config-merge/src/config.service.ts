@@ -1,29 +1,3 @@
-/**
- * Deep merges two objects.
- * Simple implementation for merging configuration objects.
- */
-function isObject(item: any): boolean {
-    return (item && typeof item === 'object' && !Array.isArray(item));
-}
-
-function mergeDeep<T>(target: T, ...sources: any[]): T {
-    if (!sources.length) return target;
-    const source = sources.shift();
-
-    if (isObject(target) && isObject(source)) {
-        for (const key in source) {
-            if (isObject(source[key])) {
-                if (!(target as any)[key]) Object.assign(target as any, { [key]: {} });
-                mergeDeep((target as any)[key], source[key]);
-            } else {
-                Object.assign(target as any, { [key]: source[key] });
-            }
-        }
-    }
-
-    return mergeDeep(target, ...sources);
-}
-
 export class ConfigService<T extends object> {
     private config: T | null = null;
 
@@ -33,7 +7,7 @@ export class ConfigService<T extends object> {
 
     /**
      * Fetches the remote configuration from the given URL and merges it with the local configuration.
-     * Remote configuration overrides local configuration fields.
+     * Remote configuration overrides local configuration fields (shallow merge).
      * 
      * @param remoteConfigUrl The URL pointing to a JSON configuration file.
      * @returns A promise resolving to the fully merged configuration.
@@ -46,7 +20,10 @@ export class ConfigService<T extends object> {
                 return this.config as T;
             }
             const remoteConfig = await response.json();
-            this.config = mergeDeep({} as T, this.localEnvironmentConfig, remoteConfig);
+
+            // Shallow object spread: Environment first, then remote overrides
+            this.config = { ...this.localEnvironmentConfig, ...remoteConfig } as T;
+
             return this.config;
         } catch (error) {
             console.error(`[ConfigService] Error fetching remote config:`, error);
