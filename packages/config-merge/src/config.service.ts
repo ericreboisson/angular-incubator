@@ -32,28 +32,41 @@ export class ConfigService<T extends object> {
     }
 
     /**
-     * Retrieves a specific property from the configuration in a type-safe manner.
-     * Use this instead of `(config as any).property`.
+     * Retrieves a specific top-level property from the configuration in a type-safe manner.
      * 
      * @param key The property key to retrieve from the configuration object.
      * @returns The value of the property, or undefined if it does not exist.
      */
     getProperty<K extends keyof T>(key: K): T[K] | undefined {
-        if (!this.config) {
-            console.warn(`ConfigService: Configuration not loaded. Cannot get property '${String(key)}'`);
-            return undefined;
+        return this.config ? this.config[key] : undefined;
+    }
+
+    /**
+     * Retrieves a deeply nested value from the configuration using a dot-notation path.
+     * Useful for accessing dynamic keys like 'bgl-analytics.activated'.
+     * 
+     * @param path The dot-separated path to the property (e.g., 'bgl-analytics.activated')
+     * @param defaultValue Optional default value if the property is undefined
+     * @returns The value at the specified path, or the default value
+     */
+    get<V = any>(path: string, defaultValue?: V): V | undefined {
+        const keys = path.split('.');
+        let current: any = this.config;
+
+        for (const key of keys) {
+            if (current === undefined || current === null) {
+                return defaultValue;
+            }
+            current = current[key];
         }
-        return this.config[key];
+
+        return current !== undefined ? current : defaultValue;
     }
 
     /**
      * Returns the current merged configuration.
-     * Throws an error if accessed before `loadAndMerge` has completed successfully.
      */
     getConfig(): T {
-        if (!this.config) {
-            throw new Error("ConfigService: Configuration has not been loaded yet.");
-        }
-        return this.config;
+        return this.config as T;
     }
 }

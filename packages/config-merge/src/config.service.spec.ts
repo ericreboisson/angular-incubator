@@ -52,4 +52,24 @@ describe('ConfigService', () => {
         const mergedConfig = await configService.loadAndMerge('http://fake-remote.json');
         expect(mergedConfig).toEqual(localConfig);
     });
+
+    it('should return local property before load', () => {
+        expect(configService.getProperty('apiEndpoint')).toBe('http://localhost');
+    });
+
+    it('should return local deep property before load', () => {
+        expect(configService.get('featureFlags.enableLogging')).toBe(false);
+    });
+
+    it('should return nested property via get() method', async () => {
+        (global.fetch as jest.Mock).mockResolvedValue({
+            ok: true,
+            json: async () => ({ 'bgl-analytics': { activated: true } }),
+        });
+        await configService.loadAndMerge('http://fake-remote.json');
+
+        expect(configService.get('bgl-analytics.activated')).toBe(true);
+        expect(configService.get('bgl-analytics.unknown', 'defaultParam')).toBe('defaultParam');
+        expect(configService.get('invalidKey')).toBeUndefined();
+    });
 });
