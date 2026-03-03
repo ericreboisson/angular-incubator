@@ -7,8 +7,8 @@ describe('HttpLoggerService', () => {
 
     beforeEach(() => {
         configService = new ConfigService({ apiEndpoint: 'http://localhost' });
-        // Mock the getProperty method to simulate a loaded config
-        jest.spyOn(configService, 'getProperty').mockImplementation((key) => {
+        // Mock the get method to simulate a loaded config
+        jest.spyOn(configService, 'get').mockImplementation((key) => {
             if (key === 'apiEndpoint') return 'http://localhost';
             if (key === 'featureFlags') return { enableLogging: true };
             return undefined;
@@ -40,7 +40,7 @@ describe('HttpLoggerService', () => {
     });
 
     it('should not send HTTP POST if logging is disabled', async () => {
-        jest.spyOn(configService, 'getProperty').mockImplementation((key) => {
+        jest.spyOn(configService, 'get').mockImplementation((key) => {
             if (key === 'apiEndpoint') return 'http://localhost';
             if (key === 'featureFlags') return { enableLogging: false };
             return undefined;
