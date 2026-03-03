@@ -4,30 +4,8 @@ export interface AppMetadata {
     component?: {
         id?: string;
     };
+    [key: string]: any;
 }
-
-/**
- * Generates all valid dot-notation paths for a given configuration object.
- * For example: 'featureFlags' | 'featureFlags.enableLogging'
- */
-export type Paths<T> = T extends object
-    ? {
-        [K in keyof T & string]: NonNullable<T[K]> extends Record<string, any>
-        ? K | `${K}.${Paths<NonNullable<T[K]>>}`
-        : K
-    }[keyof T & string]
-    : never;
-
-/**
- * Extracts the specific type at a given dot-notation path.
- */
-export type TypeFromPath<T, Path extends string> =
-    Path extends keyof T ? T[Path] :
-    Path extends `${infer Key}.${infer Rest}`
-    ? Key extends keyof T
-    ? TypeFromPath<NonNullable<T[Key]>, Rest>
-    : never
-    : never;
 
 function isObject(item: any): item is Record<string, any> {
     return (item && typeof item === 'object' && !Array.isArray(item));
@@ -96,11 +74,8 @@ export class ConfigService<T extends object> {
      * @param defaultValue Optional default value if the property is undefined
      * @returns The value at the specified path, or the default value
      */
-    get<
-        Path extends Paths<T & AppMetadata>,
-        V = TypeFromPath<T & AppMetadata, Path>
-    >(path: Path, defaultValue?: V): V | undefined {
-        const keys = (path as string).split('.');
+    get<V = any>(path: string, defaultValue?: V): V | undefined {
+        const keys = path.split('.');
         let current: any = this.config;
 
         for (const key of keys) {

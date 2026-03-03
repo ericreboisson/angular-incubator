@@ -1,6 +1,6 @@
 import { ConfigService } from './config.service';
 
-export class HttpLoggerService<T extends { apiEndpoint?: string; featureFlags?: { enableLogging?: boolean } }> {
+export class HttpLoggerService<T extends object> {
     constructor(private configService: ConfigService<T>) { }
 
     /**
@@ -28,8 +28,8 @@ export class HttpLoggerService<T extends { apiEndpoint?: string; featureFlags?: 
      * Internal method to construct and send the log payload via HTTP POST.
      */
     private async log(level: 'info' | 'warn' | 'error', message: string, context?: Record<string, any>): Promise<void> {
-        const featureFlags = this.configService.get('featureFlags' as any) as { enableLogging?: boolean } | undefined;
-        const apiEndpoint = this.configService.get('apiEndpoint' as any) as string | undefined;
+        const featureFlags = this.configService.get('featureFlags');
+        const apiEndpoint = this.configService.get('apiEndpoint');
 
         if (!featureFlags?.enableLogging) {
             console.log(`[HttpLoggerService] Logging disabled for: [${level.toUpperCase()}] ${message}`);

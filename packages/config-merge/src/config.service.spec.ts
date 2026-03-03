@@ -95,13 +95,13 @@ describe('ConfigService', () => {
         });
         await configService.loadAndMerge('http://fake-remote.json');
 
-        expect(configService.get('bgl-analytics.activated' as any)).toBe(true);
+        expect(configService.get('bgl-analytics.activated')).toBe(true);
         expect(console.log).toHaveBeenCalledWith(expect.stringContaining("Accessed property 'bgl-analytics.activated'"), true);
 
-        expect(configService.get('bgl-analytics.unknown' as any, 'defaultParam')).toBe('defaultParam');
+        expect(configService.get('bgl-analytics.unknown', 'defaultParam')).toBe('defaultParam');
         expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("Property 'bgl-analytics.unknown' not found"), 'defaultParam');
 
-        expect(configService.get('invalidKey' as any)).toBeUndefined();
+        expect(configService.get('invalidKey')).toBeUndefined();
         expect(console.warn).toHaveBeenCalledWith(expect.stringContaining("Property 'invalidKey' not found"), undefined);
     });
 });
